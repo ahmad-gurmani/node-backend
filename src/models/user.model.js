@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 
 const userSchema = mongoose.Schema(
     {
-        userName: {
+        username: {
             type: String,
             required: true,
             unique: true,
@@ -52,13 +52,24 @@ const userSchema = mongoose.Schema(
     { timestamps: true }
 )
 
-console.log(userSchema, "createdsdfdsfm");
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+// userSchema.pre("save", async function (next) {
+//     if (!this.isModified("password")) return next();
 
-    this.password = bcrypt.hash(this.password, 10)
-    next()
-})
+//     this.password = await bcrypt.hash(this.password, 10)
+//     next();
+// })
+
+userSchema.pre('save', function (next) {
+    if (!this.isModified('password')) return next();
+
+    bcrypt.hash(this.password, 10, (err, hashedPassword) => {
+        if (err) return next(err);
+        this.password = hashedPassword;
+        next();
+    });
+});
+
+
 
 userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password)
