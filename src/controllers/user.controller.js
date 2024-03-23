@@ -27,7 +27,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     // check if user already exist: username , email
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ email }, { username }]
     })
 
@@ -40,7 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
     if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file is required")
+        throw new ApiError(400, "AvatarLocalPath is required")
     }
 
     // upload on cloudinary
@@ -65,7 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 
     // remove password and refresh token from response
-    const createdUser = await user.findById(user._id).select(
+    const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
 
@@ -76,7 +76,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // return response
     return res.status(201).json(
-        new ApiError(200, createdUser, "User created/registered successfully")
+        new ApiResponse(200, createdUser, "User created/registered successfully")
     )
 
 })
