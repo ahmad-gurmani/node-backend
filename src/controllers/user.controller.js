@@ -37,7 +37,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // check for image, check for avatar
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    // below way prevent us from undefined error if not url
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files?.coverImage[0]?.path;
+    }
+
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "AvatarLocalPath is required")
@@ -56,13 +63,13 @@ const registerUser = asyncHandler(async (req, res) => {
         {
             fullName,
             avatar: avatar.url,
-            coverImage: coverImage?.url | "",
+            coverImage: coverImage?.url || "",
             email,
             password,
             username: username.toLowerCase(),
 
         }
-    )
+    );
 
     // remove password and refresh token from response
     const createdUser = await User.findById(user._id).select(
