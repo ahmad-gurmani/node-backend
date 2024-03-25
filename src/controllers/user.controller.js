@@ -121,9 +121,14 @@ const loginUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
 
     // check username / email exist or not
-    if (!username || !email) {
+    if (!username && !email) {
         throw new ApiError(400, "username or email is required");
     }
+
+    // here is an alternate approach of above code based on logic discussed
+    // if (!(username || email)) {
+    //     throw new ApiError(400, "username or email is required");
+    // }
 
     // find the user
     const user = await User.findOne({
