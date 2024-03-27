@@ -266,7 +266,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
         // Assuming res.user is set by middleware
         return res
             .status(200)
-            .json(new ApiResponse(200, res.user, "current user fetched successfully"));
+            .json(
+                new ApiResponse(
+                    200,
+                    res.user,
+                    "current user fetched successfully"
+                )
+            );
     } catch (error) {
         // Handle any errors that occur during the process
         return res.status(500).json({ message: 'Server Error' });
@@ -280,7 +286,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields are required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: { fullName: fullName, email: email }
@@ -311,6 +317,8 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Error while uploading coverImage")
     }
 
+    //  TODO: delete old image - assignment
+
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
@@ -337,6 +345,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     if (!avatar.url) {
         throw new ApiError(400, "Error while uploading avatar")
     }
+
+    //  TODO: delete old image - assignment
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
