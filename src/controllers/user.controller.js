@@ -171,8 +171,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1 // removes the filed form document
             }
         },
         {
@@ -270,7 +270,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             .json(
                 new ApiResponse(
                     200,
-                    res.user,
+                    req.user,
                     "current user fetched successfully"
                 )
             );
@@ -440,7 +440,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     }
 
     return res
-        .startus(200)
+        .status(200)
         .json(
             new ApiResponse(200, channel[0], "User channel fetched successfully")
         )
@@ -493,11 +493,15 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         }
     ])
 
-    return res.startus(200)
+    return res
+        .status(200)
         .json(
-            200,
-            user[0].watchHistory,
-            "Watch History fetched successfully"
+            new ApiResponse(
+                200,
+                user[0].watchHistory,
+                "Watch History fetched successfully"
+            )
+
         )
 })
 
