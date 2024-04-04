@@ -12,9 +12,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
-    // TODO: get video, upload to cloudinary, create video obj
-
-    // methods/steps for user login
+    // methods/steps for publishAVideo
 
     // get data from req body
     const { title, description } = req.body;
@@ -70,8 +68,23 @@ const publishAVideo = asyncHandler(async (req, res) => {
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
+    //TODO: get video by id = Done
+    // get video id from url
     const { videoId } = req.params
-    //TODO: get video by id
+
+    if (!videoId) {
+        throw new ApiError(400, "video id is required")
+    }
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    return res
+        .status(200).
+        json(new ApiResponse(200, video, "Video retrieve successfully"))
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
