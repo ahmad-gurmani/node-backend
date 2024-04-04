@@ -17,7 +17,7 @@ const uploadOnCloudinary = async (localFilePath) => {
         }
         )
 
-        // when file successfully uploaded on cloudinary then it will be revmoved from it from public folder
+        // when file successfully uploaded on cloudinary then it will be revmoved from public folder
         fs.unlinkSync(localFilePath);
 
         return response;
