@@ -260,7 +260,6 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "password changed successfully"));
 })
 
-
 // Define an asynchronous function using asyncHandler middleware
 const getCurrentUser = asyncHandler(async (req, res) => {
     try {
