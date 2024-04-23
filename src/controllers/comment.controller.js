@@ -12,6 +12,31 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
 const addComment = asyncHandler(async (req, res) => {
     //Todo: add a comment to a video
+    const { videoId } = req.params;
+    const { content } = req.body;
+
+    if (!videoId) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    // ensure comment is not empty
+    if (!content || content.trim() === '') {
+        throw new ApiError(400, "Comment cannot be empty")
+    }
+
+    const comment = await Comment.create({
+        content,
+        video: videoId,
+        owner: req.user._id
+    })
+
+    if (!comment) {
+        throw new ApiError(400, "Failed to add comment")
+    }
+
+    return res
+        .status(201)
+        .json(new ApiResponse(201, comment, "Comment added successfully"))
 })
 
 const updateComment = asyncHandler(async (req, res) => {
