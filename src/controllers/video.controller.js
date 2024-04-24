@@ -11,7 +11,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
 
     const pageNumber = parseInt(page, 10);
-    const limitOfComments = parseInt(limit, 10);
+    const limitOfvideos = parseInt(limit, 10);
 
     const user = await User.find({
         refreshToken: req.cookies.refreshToken,
@@ -21,8 +21,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User is required.");
     }
 
-    const skip = (pageNumber - 1) * limitOfComments;
-    const pageSize = limitOfComments;
+    const skip = (pageNumber - 1) * limitOfvideos;
+    const pageSize = limitOfvideos;
 
     const videos = await Video.aggregatePaginate([
         {
