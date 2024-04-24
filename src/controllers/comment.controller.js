@@ -5,10 +5,74 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 const getVideoComments = asyncHandler(async (req, res) => {
-    //Todo: get All comments for a video
-    const { videoId } = req.param;
+    const { videoId } = req.params;
     const { page = 1, limit = 10 } = req.query;
-})
+
+    // Basic validation for videoId
+    if (!videoId) {
+        throw new ApiError(400, "Invalid video ID");
+    }
+
+    const pageNumber = parseInt(page);
+    const limitOfComments = parseInt(limit);
+    const skip = (pageNumber - 1) * limitOfComments;
+
+    // Aggregation pipeline to fetch comments with additional data
+    const comments = await Comment.aggregate([
+        {
+            $match: { video: new mongoose.Types.ObjectId(videoId) } // Match comments for the specific video
+        },
+        {
+            $lookup: {
+                from: "users", // Lookup comment owner from users collection
+                localField: "owner",
+                foreignField: "_id",
+                as: "commentOwner"
+            }
+        },
+        {
+            $lookup: {
+                from: "likes", // Lookup likes associated with each comment
+                localField: "_id",
+                foreignField: "comment",
+                as: "commentLikes"
+            }
+        },
+        {
+            $addFields: {
+                commentLikesCount: { $size: "$commentLikes" }, // Add field for comment likes count
+                commentOwner: { $arrayElemAt: ["$commentOwner", 0] }, // Extract comment owner information
+                isLiked: {
+                    $cond: {
+                        if: { $in: [req.user?._id, "$commentLikes.likedBy"] },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                content: 1,
+                createdAt: 1,
+                commentOwner: { _id: 1, username: 1, avatar: 1 },
+                commentLikesCount: 1,
+                isLiked: 1
+            }
+        },
+        { $sort: { createdAt: -1 } }, // Sort comments by createdAt field in descending order
+        { $skip: skip }, // Skip comments based on pagination
+        { $limit: limitOfComments } // Limit the number of comments per page
+    ]);
+
+    // If no comments are found for the given videoId, send an error response
+    if (!comments || comments.length === 0) {
+        throw new ApiError(404, "No comments found for the video");
+    }
+
+    // Send the retrieved comments in the response
+    res.status(200).json(new ApiResponse(200, { comments }, "Comments retrieved successfully"));
+});
 
 const addComment = asyncHandler(async (req, res) => {
     //Todo: add a comment to a video
